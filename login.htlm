@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion | mine.sous-terre.cri</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#eff2f4;
+    --surface:#ffffff;
+    --surface-2:#f2f5f7;
+    --border:#d7e0e5;
+    --text:#1c2a30;
+    --text-dim:#5b7282;
+    --accent:#e5a916;
+    --accent-hover:#c68f10;
+    --accent-2:#305361;
+    --rouge:#b3261e;
+    --rouge-pale:#fdecea;
+    --mono:'IBM Plex Mono','SF Mono',monospace;
+    --disp:'Barlow Condensed','Arial Narrow',sans-serif;
+    --body:'Inter',-apple-system,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:var(--body);
+    background:var(--bg);
+    color:var(--text);
+    margin:0;
+  }
+  .cadre{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  body::before{
+    content:'';position:fixed;top:0;left:0;right:0;height:6px;background:var(--accent);
+  }
+  .carte{
+    background:var(--surface);border-radius:14px;padding:38px 32px;
+    width:100%;max-width:400px;margin:auto;box-shadow:0 18px 50px rgba(28,42,48,.14);border-top:5px solid var(--accent);
+  }
+  .marque{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:22px}
+  .marque img{height:78px;width:auto}
+  h1{
+    font-family:var(--disp);color:var(--text);font-size:22px;font-weight:800;
+    line-height:1.2;text-align:center;text-transform:uppercase;letter-spacing:.3px;
+    margin-top:4px;
+  }
+  .sous{color:var(--text-dim);font-size:13.5px;margin:6px 0 26px;text-align:center}
+  label{display:block;font-size:13px;font-weight:700;color:var(--text-dim);margin:0 0 6px}
+  input{
+    width:100%;padding:14px;font-size:16px;border:2px solid var(--border);border-radius:8px;
+    margin-bottom:16px;background:var(--surface-2);color:var(--text);font-family:inherit;
+  }
+  input:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+  button{
+    width:100%;padding:15px;font-size:16px;font-weight:800;letter-spacing:.02em;
+    background:var(--accent);color:var(--accent-2);border:none;border-radius:8px;cursor:pointer;
+  }
+  button:hover{background:var(--accent-hover)}
+  button:disabled{opacity:.55;cursor:wait}
+  .erreur{
+    display:none;background:var(--rouge-pale);color:var(--rouge);border:1px solid #F5C6C0;
+    border-radius:8px;padding:11px 13px;font-size:14px;margin-bottom:16px;
+  }
+</style>
+</head>
+<body>
+  <div class="cadre">
+  <div class="carte">
+    <div class="marque">
+      <img src="logo-cri.png" alt="Canadian Royalties inc.">
+    </div>
+    <h1>Département Mine Sous-Terre</h1>
+    <p class="sous">Suivi administratif des opérations</p>
+    <div class="erreur" id="erreur"></div>
+    <label for="courriel">Courriel</label>
+    <input type="email" id="courriel" autocomplete="username" placeholder="prenom.nom@exemple.com">
+    <label for="mdp">Mot de passe</label>
+    <input type="password" id="mdp" autocomplete="current-password" placeholder="••••••••">
+    <button id="btn" onclick="connexion()">Entrer</button>
+  </div>
+  </div>
+
+<script>
+const SUPABASE_URL = 'https://bcomfkechyrvrbourhbr.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjb21ma2VjaHlydnJib3VyaGJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4MTIxNjMsImV4cCI6MjA5OTM4ODE2M30.zwOslsZruNnap5TrBOIBUkhhROvxumEPeOqZ1oDcN4w';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Déjà connecté ? On saute la page.
+sb.auth.getSession().then(({data:{session}}) => { if (session) location.replace('index.html'); });
+
+async function connexion(){
+  const btn = document.getElementById('btn');
+  const err = document.getElementById('erreur');
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Connexion…';
+  const { error } = await sb.auth.signInWithPassword({
+    email: document.getElementById('courriel').value.trim(),
+    password: document.getElementById('mdp').value
+  });
+  if (error) {
+    err.textContent = 'Courriel ou mot de passe invalide.';
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Entrer';
+    return;
+  }
+  location.replace('index.html');
+}
+document.getElementById('mdp').addEventListener('keydown', e => { if (e.key === 'Enter') connexion(); });
+</script>
+</body>
+</html>
